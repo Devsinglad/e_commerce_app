@@ -19,55 +19,59 @@ class CartScreen extends StatefulWidget {
 class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
-      var dB= Provider.of<ProductApi>(context,listen: false);
-      dB.getUserCarts();
+    var dB = Provider.of<ProductApi>(context, listen: false);
+    dB.getUserCarts();
 
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ProductApi>(builder: (context, snapshot, _) {
       if (snapshot.initCartPage) {
         return Scaffold(
-            body: Center(child: customLoader()),
-          );
+          body: Center(child: customLoader()),
+        );
       } else {
         return Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: Column(
-            children: [
-              InkWell(
-                onTap: (){
-                  snapshot.getUserCarts();
-                },
-                child: const Text(
-                  "Your Cart",
-                  style: TextStyle(color: Colors.black),
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    snapshot.getUserCarts();
+                  },
+                  child: const Text(
+                    "Your Cart",
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
-              ),
-              Text(
-                "${snapshot.userCartItems.length} items",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
+                Text(
+                  "${snapshot.userCartItems.length} items",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
           ),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
-         child: ListView.builder(
-            itemCount: snapshot.userCartItems.length,
-            itemBuilder: (context, i) {
-              final cartIt=snapshot.userCartItems[i];
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child:  Text('${cartIt.productId.toString()} of products')
-              );
-            }
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: ListView.builder(
+                itemCount: snapshot.userCartItems.length,
+                itemBuilder: (context, i) {
+                  final cartIt = snapshot.userCartItems[i];
+                  return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: CartCard(
+                        title: snapshot.title??'',
+                        image: snapshot.image??'',
+                        price: snapshot.price.toString()??'',
+                        quantity: cartIt.quantity.toString()??'',
+                      ));
+                }),
           ),
-        ),
-        bottomNavigationBar: const CheckoutCard(),
-      );
+          bottomNavigationBar: const CheckoutCard(),
+        );
       }
     });
   }
@@ -76,14 +80,14 @@ class _CartScreenState extends State<CartScreen> {
 class CartCard extends StatelessWidget {
   const CartCard({
     Key? key,
-    this.image,
+    required this.image,
     this.price,
     this.title,
     this.rating,
     this.quantity,
   }) : super(key: key);
 
-  final String? image;
+  final String image;
   final String? price;
   final String? title;
   final String? rating;
@@ -103,7 +107,7 @@ class CartCard extends StatelessWidget {
                 color: const Color(0xFFF5F6F9),
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: Image.network(image!),
+              child: image.isEmpty?Image.asset('assets/images/ps4_console_blue_1.png'):Image.network(image),
             ),
           ),
         ),
@@ -124,7 +128,7 @@ class CartCard extends StatelessWidget {
                     fontWeight: FontWeight.w600, color: kPrimaryColor),
                 children: [
                   TextSpan(
-                      text: " x${rating}",
+                      text: " x${quantity}",
                       style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),

@@ -19,8 +19,6 @@ class ProductApi extends ChangeNotifier {
   var image;
   var title;
   var price;
-
-  //UserCart? cartData;
   List<Products> userCartItems = [];
   bool initCatPage = false;
   bool initCartPage = false;
@@ -102,7 +100,6 @@ class ProductApi extends ChangeNotifier {
         var decodedData = jsonDecode(responseModel.response.body);
 
         if (decodedData is List) {
-          // Assuming the response is a list of carts
           userCartItems = [];
           for (var cartData in decodedData) {
             if (cartData is Map<String, dynamic>) {
@@ -111,7 +108,7 @@ class ProductApi extends ChangeNotifier {
             }
           }
         }
-
+         //fetchProductDetailsForCart();
         initCartPage = false;
         notifyListeners();
       } else {
@@ -127,19 +124,17 @@ class ProductApi extends ChangeNotifier {
 
   Future<void> fetchProductDetailsForCart() async {
     for (var product in userCartItems) {
-      print(product.productId);
-      //await getSingleProductDetails(productId: product.productId);
+      await getSingleProductDetails(productId: product.productId);
     }
   }
 
   Future<void> getSingleProductDetails({productId}) async {
     try {
-      buttonState = ButtonState.loading;
       ResponseModel responseModel = await _apiService
           .call(
               method: HttpMethod.get,
               endpoint: 'https://fakestoreapi.com/products/$productId')
-          .timeout(Duration(seconds: 10));
+          .timeout(const Duration(seconds: 30));
       print('<<<<${responseModel.statusCode}>>>>');
       print(responseModel.response.body);
       if (responseModel.isSuccess) {
@@ -148,11 +143,10 @@ class ProductApi extends ChangeNotifier {
         var decodedData = jsonDecode(responseModel.response.body);
         var responseData = SingleProductDetail.fromJson(decodedData);
         price = responseData.price;
-        print('<<<<<$decodedData');
+        image = responseData.image;
+        title= responseData.title;
+
         print('<<<<<${responseData.image}');
-        notifyListeners();
-      } else {
-        buttonState = ButtonState.idle;
         notifyListeners();
       }
     } on TimeoutException catch (e) {
@@ -162,4 +156,5 @@ class ProductApi extends ChangeNotifier {
       throw Exception('Bad Request: $e, $s');
     }
   }
+
 }
