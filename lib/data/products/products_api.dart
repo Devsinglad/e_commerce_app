@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:e_commerce_app/utils/helper.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,6 @@ import '../../core/base_response.dart';
 import '../../models/Cart.dart';
 import '../../models/Product.dart';
 import '../../models/product_category.dart';
-import '../../provider/controller.dart';
 import '../../utils/enum.dart';
 
 class ProductApi extends ChangeNotifier {
@@ -16,13 +16,27 @@ class ProductApi extends ChangeNotifier {
   ButtonState buttonState = ButtonState.idle;
   List categories = <ProductCategory>[];
   List<ProductsInEachCat> products = [];
-  List<UserCart> userCartItems = [];
+  var image;
+  var title;
+  var price;
+
+  //UserCart? cartData;
+  List<Products> userCartItems = [];
+  bool initCatPage = false;
+  bool initCartPage = false;
 
   Future<void> getCategories() async {
-    ResponseModel responseModel = await _apiService.call(
+    initCatPage = true;
+    notifyListeners();
+    ResponseModel responseModel = await _apiService
+        .call(
       method: HttpMethod.get,
       endpoint: '${_apiRoutes.baseUrl}${_apiRoutes.getCategory}',
-    );
+    )
+        .whenComplete(() {
+      initCatPage = false;
+      notifyListeners();
+    });
     print(responseModel.statusCode);
     var decodeData = jsonDecode(responseModel.response.body);
     var data = ProductCategory.fromJson(decodeData);
@@ -75,44 +89,57 @@ class ProductApi extends ChangeNotifier {
     }
   }
 
-  Future<List<CartEntry>?> getUserCart({String? productId}) async {
+  Future<void> getUserCarts({productId}) async {
     try {
-      buttonState = ButtonState.loading;
+      initCartPage = true;
       ResponseModel responseModel = await _apiService.call(
           method: HttpMethod.get,
           endpoint: 'https://fakestoreapi.com/carts/user/1');
-      print('<<<<${responseModel.statusCode}>>>>');
-      print(responseModel.response.body);
-      if (responseModel.isSuccess) {
-        buttonState = ButtonState.success;
-        notifyListeners();
-        var decodedData = jsonDecode(responseModel.response.body);
-        List<CartEntry> responseData = (decodedData as List<dynamic>)
-            .map((entry) => CartEntry.fromJson(entry))
-            .toList();
 
-        userCartItems =
-            responseData.map((entry) => UserCart(userCarts: [entry])).toList();
-        userCartItems.first.userCarts.first.products.first.productId;
-        getSingleProductDetails(productId: productId);
+      print('<<<<${responseModel.statusCode}>>>>');
+
+      if (responseModel.isSuccess) {
+        var decodedData = jsonDecode(responseModel.response.body);
+
+        if (decodedData is List) {
+          // Assuming the response is a list of carts
+          userCartItems = [];
+          for (var cartData in decodedData) {
+            if (cartData is Map<String, dynamic>) {
+              var userCart = UserCart.fromJson(cartData);
+              userCartItems.addAll(userCart.products ?? []);
+            }
+          }
+        }
+
+        initCartPage = false;
         notifyListeners();
-        return responseData;
       } else {
-        buttonState = ButtonState.idle;
+        initCartPage = false;
         notifyListeners();
-        return null;
       }
     } catch (e, s) {
+      initCartPage = false;
+      notifyListeners();
       throw Exception('Bad Request: $e, $s');
+    }
+  }
+
+  Future<void> fetchProductDetailsForCart() async {
+    for (var product in userCartItems) {
+      print(product.productId);
+      //await getSingleProductDetails(productId: product.productId);
     }
   }
 
   Future<void> getSingleProductDetails({productId}) async {
     try {
       buttonState = ButtonState.loading;
-      ResponseModel responseModel = await _apiService.call(
-          method: HttpMethod.get,
-          endpoint: 'https://fakestoreapi.com/products/$productId');
+      ResponseModel responseModel = await _apiService
+          .call(
+              method: HttpMethod.get,
+              endpoint: 'https://fakestoreapi.com/products/$productId')
+          .timeout(Duration(seconds: 10));
       print('<<<<${responseModel.statusCode}>>>>');
       print(responseModel.response.body);
       if (responseModel.isSuccess) {
@@ -120,53 +147,17 @@ class ProductApi extends ChangeNotifier {
         notifyListeners();
         var decodedData = jsonDecode(responseModel.response.body);
         var responseData = SingleProductDetail.fromJson(decodedData);
-
-        print('<<<<<${decodedData}');
+        price = responseData.price;
+        print('<<<<<$decodedData');
         print('<<<<<${responseData.image}');
         notifyListeners();
       } else {
         buttonState = ButtonState.idle;
         notifyListeners();
       }
-    } catch (e, s) {
-      throw Exception('Bad Request: $e, $s');
-    }
-  }
-
-  Future<List<ProductEntry>?> getUserCarts() async {
-    try {
-      buttonState = ButtonState.loading;
-      ResponseModel responseModel = await _apiService.call(
-        method: HttpMethod.get,
-        endpoint: 'https://fakestoreapi.com/carts/user/1',
-      );
-      print('<<<<${responseModel.statusCode}>>>>');
-      print(responseModel.response.body);
-      if (responseModel.isSuccess) {
-        buttonState = ButtonState.success;
-        notifyListeners();
-        var decodedData = jsonDecode(responseModel.response.body);
-        List<ProductEntry> responseData =
-            (decodedData as List<dynamic>).map((entry) {
-          List<dynamic> products = entry['products'];
-          return ProductEntry(
-            productId: products[0]['productId'],
-            quantity: products[0]['quantity'],
-          );
-        }).toList();
-        print('>>>>${responseData[3].productId}>>>');
-
-
-        // Assuming there can be multiple products in the cart for the user
-        // If so, iterate through all products and add them to the responseData list
-
-        notifyListeners();
-        return responseData;
-      } else {
-        buttonState = ButtonState.idle;
-        notifyListeners();
-        return null;
-      }
+    } on TimeoutException catch (e) {
+      toastMessage(text: 'Network TIme out');
+      print('Timeout: $e');
     } catch (e, s) {
       throw Exception('Bad Request: $e, $s');
     }

@@ -1,6 +1,5 @@
-import 'package:e_commerce_app/config/routes.dart';
+import 'package:e_commerce_app/components/c_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../../data/products/products_api.dart';
@@ -47,7 +46,8 @@ class _SpecialOffersState extends State<SpecialOffers> {
           ),
         ),
         Consumer<ProductApi>(builder: (context, api, _) {
-          return SizedBox(
+          if(!api.initCatPage) {
+            return SizedBox(
             height: MediaQuery.of(context).size.height*0.9,
             width: double.maxFinite,
             child: ListView.builder(
@@ -73,6 +73,13 @@ class _SpecialOffersState extends State<SpecialOffers> {
               itemCount: api.categories.length,
             ),
           );
+          } else {
+            return SizedBox(
+              height: MediaQuery.of(context).size.height*0.9,
+              width: double.maxFinite,
+              child: Center(child: customLoader()),
+            );
+          }
         }),
       ],
     );

@@ -1,3 +1,4 @@
+import 'package:e_commerce_app/components/c_indicator.dart';
 import 'package:e_commerce_app/data/products/products_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -18,21 +19,26 @@ class CartScreen extends StatefulWidget {
 class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
-    Future.delayed(Duration.zero).then((value) {
       var dB= Provider.of<ProductApi>(context,listen: false);
-      dB.getUserCart();
-    });
+      dB.getUserCarts();
+
     super.initState();
   }
   @override
   Widget build(BuildContext context) {
     return Consumer<ProductApi>(builder: (context, snapshot, _) {
-      return Scaffold(
+      if (snapshot.initCartPage) {
+        return Scaffold(
+            body: Center(child: customLoader()),
+          );
+      } else {
+        return Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Column(
             children: [
               InkWell(
-                onTap: () {
+                onTap: (){
                   snapshot.getUserCarts();
                 },
                 child: const Text(
@@ -41,27 +47,28 @@ class _CartScreenState extends State<CartScreen> {
                 ),
               ),
               Text(
-                "${snapshot.userCartItems.first.userCarts.first.products.length} items",
-                style: Theme.of(context).textTheme.bodySmall,
+                "${snapshot.userCartItems.length} items",
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          // child: ListView.builder(
-          //   itemCount: snapshot.userCartItems.length,
-          //   itemBuilder: (context, i) {
-          //     final cartIt=snapshot.userCartItems[i];
-          //     return Padding(
-          //       padding: const EdgeInsets.symmetric(vertical: 10),
-          //       child:  Text(snapshot.userCartItems[i].userCarts[i].products[i].quantity.toString())
-          //     );
-          //   }
-          // ),
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+         child: ListView.builder(
+            itemCount: snapshot.userCartItems.length,
+            itemBuilder: (context, i) {
+              final cartIt=snapshot.userCartItems[i];
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child:  Text('${cartIt.productId.toString()} of products')
+              );
+            }
+          ),
         ),
         bottomNavigationBar: const CheckoutCard(),
       );
+      }
     });
   }
 }

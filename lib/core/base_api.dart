@@ -36,11 +36,13 @@ class ApiService {
             Uri.parse(endpoint),
             headers: headers,
             body: reqBody != null ? jsonEncode(reqBody) : null,
+
           );
           return _handleResponse(response);
 
         case HttpMethod.get:
           var response = await http.get(
+
             Uri.parse(endpoint),
             headers: headers,
           );
@@ -86,9 +88,6 @@ class ApiService {
     try{
 
       if (response.statusCode == 200) {
-        var decode = jsonDecode(response.body);
-
-
         return ResponseModel(response);
       } else if (response.statusCode == 401) {
 

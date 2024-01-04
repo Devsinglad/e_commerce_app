@@ -1,13 +1,10 @@
 import 'package:e_commerce_app/components/c_indicator.dart';
-import 'package:e_commerce_app/config/routes.dart';
 import 'package:e_commerce_app/data/auth/auth_repo.dart';
 import 'package:e_commerce_app/utils/enum.dart';
 import 'package:e_commerce_app/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-
-import '../../../components/c_button.dart';
 import '../../../components/c_text_form_field.dart';
 import '../../../components/custom_surfix_icon.dart';
 import '../../../provider/controller.dart';
@@ -58,6 +55,7 @@ class _SignFormState extends State<SignForm> {
                 if (_formKey.currentState!.validate()) {
                   snapshot.signIn(controllers.userNameController.text,
                       controllers.passwordController.text, context);
+                  print(controllers.userNameController.text);
                 }
               },
               child: snapshot.buttonState == ButtonState.loading

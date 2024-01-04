@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:e_commerce_app/utils/helper.dart';
 import 'package:flutter/material.dart';
@@ -70,35 +71,49 @@ class AuthApi extends ChangeNotifier {
     }
   }
   void signIn(username, password, context) async {
-    final url = Uri.parse('https://fakestoreapi.com/auth/login');
+    try{
 
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(
-        {
-          'username': 'mor_2314',
-          'password': '83r5^_',
-        },
-      ),
-    );
-
-    if (response.statusCode == 200) {
-      buttonState = ButtonState.success;
+      buttonState = ButtonState.loading;
       notifyListeners();
-      var decode = jsonDecode(response.body);
-       await hiveStorage.put(HiveKeys.token, decode['token']);
-      Navigator.pushReplacementNamed(
-          context, RouteGenerator.loginSuccessScreen);
-      print('Response: $decode');
-      getStoredToken();
-    } else {
+      final url = Uri.parse('https://fakestoreapi.com/auth/login');
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(
+          {
+            'username':username,
+            'password':password
+          },
+        ),
+      ).timeout(const Duration(seconds: 20));
+
+      if (response.statusCode == 200) {
+        buttonState = ButtonState.success;
+        notifyListeners();
+        var decode = jsonDecode(response.body);
+        await hiveStorage.put(HiveKeys.token, decode['token']);
+        Navigator.pushReplacementNamed(
+            context, RouteGenerator.loginSuccessScreen);
+        print('Response: $decode');
+        getStoredToken();
+        buttonState = ButtonState.success;
+        toastMessage(text: "Sign in successful", isError: true);
+      } else {
+        buttonState = ButtonState.idle;
+        toastMessage(text: response.body, isError: true);
+
+        notifyListeners();
+        print('Request failed with status: ${response.statusCode}');
+        print('Response: ${response.body}');
+      }
+    } on TimeoutException catch(e){
+      toastMessage(text: 'Network Error');
       buttonState = ButtonState.idle;
-      toastMessage(text: response.body, isError: true);
 
       notifyListeners();
-      print('Request failed with status: ${response.statusCode}');
-      print('Response: ${response.body}');
+    }catch(e){
+
     }
   }
 
