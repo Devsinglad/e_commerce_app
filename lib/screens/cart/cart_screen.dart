@@ -142,31 +142,3 @@ class CartCard extends StatelessWidget {
     );
   }
 }
-
-//
-// Dismissible(
-// key: Key(cartIt.userCarts[index]
-//     .products[index].productId
-//     .toString()),
-// direction: DismissDirection.endToStart,
-// onDismissed: (direction) {
-// setState(() {
-// snapshot.userCartItems.removeAt(index);
-// });
-// },
-// background: Container(
-// padding: const EdgeInsets.symmetric(horizontal: 20),
-// decoration: BoxDecoration(
-// //Color(0xFFFFE6E6)
-// color: Colors.redAccent,
-// borderRadius: BorderRadius.circular(15),
-// ),
-// child: Row(
-// children: [
-// const Spacer(),
-// SvgPicture.asset("assets/icons/Trash.svg"),
-// ],
-// ),
-// ),
-// child: Text(cartIt.userCarts[index].userId.toString()),
-// ),
