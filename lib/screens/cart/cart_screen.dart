@@ -117,8 +117,11 @@ class CartCard extends StatelessWidget {
           children: [
             Text(
               title!,
-              style: const TextStyle(color: Colors.black, fontSize: 16),
-              maxLines: 2,
+              style: const TextStyle(color: Colors.black, fontSize: 8),
+              maxLines: 3,
+              softWrap: true,
+
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 8),
             Text.rich(
