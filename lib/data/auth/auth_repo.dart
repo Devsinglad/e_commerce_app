@@ -11,7 +11,7 @@ import '../../core/base_response.dart';
 import '../../provider/controller.dart';
 import '../../utils/enum.dart';
 import '../database.dart';
-import 'package:http/http.dart'as http;
+import 'package:http/http.dart' as http;
 
 class AuthApi extends ChangeNotifier {
   final ApiService _apiService = ApiService();
@@ -70,53 +70,43 @@ class AuthApi extends ChangeNotifier {
       notifyListeners();
     }
   }
-  void signIn(username, password, context) async {
-    try{
 
+  void signIn(username, password, context) async {
+    try {
       buttonState = ButtonState.loading;
       notifyListeners();
       final url = Uri.parse('https://fakestoreapi.com/auth/login');
 
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(
-          {
-            'username':username,
-            'password':password
-          },
-        ),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(
+              {'username': username, 'password': password},
+            ),
+          )
+          .timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         buttonState = ButtonState.success;
         notifyListeners();
-        var decode = jsonDecode(response.body);
-        await hiveStorage.put(HiveKeys.token, decode['token']);
         Navigator.pushReplacementNamed(
             context, RouteGenerator.loginSuccessScreen);
-        print('Response: $decode');
-        getStoredToken();
-        buttonState = ButtonState.success;
         toastMessage(text: "Sign in successful", isError: true);
       } else {
         buttonState = ButtonState.idle;
         toastMessage(text: response.body, isError: true);
-
         notifyListeners();
         print('Request failed with status: ${response.statusCode}');
-        print('Response: ${response.body}');
       }
-    } on TimeoutException catch(e){
+    } on TimeoutException catch (e) {
       toastMessage(text: 'Network Error');
       buttonState = ButtonState.idle;
-
       notifyListeners();
-    }catch(e){
-
+    } catch (e) {
+      print(e);
     }
   }
-
 
   String? getStoredToken() {
     var token = hiveStorage.get<String?>(HiveKeys.token);
@@ -124,8 +114,4 @@ class AuthApi extends ChangeNotifier {
     notifyListeners();
     return token;
   }
-
-
-
-
 }
