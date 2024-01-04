@@ -29,7 +29,7 @@ A Flutter-based shop app that utilizes the Provider package for efficient state 
 - Clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/devsinglad/shop-app.git
+git clone https://github.com/Devsinglad/e_commerce_app.git
 ```
 
 ## Getting Started
