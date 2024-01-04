@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:e_commerce_app/screens/login_success/login_success_screen.dart';
 import 'package:e_commerce_app/utils/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -76,7 +77,6 @@ class AuthApi extends ChangeNotifier {
       buttonState = ButtonState.loading;
       notifyListeners();
       final url = Uri.parse('https://fakestoreapi.com/auth/login');
-
       final response = await http
           .post(
             url,
@@ -84,14 +84,13 @@ class AuthApi extends ChangeNotifier {
             body: jsonEncode(
               {'username': username, 'password': password},
             ),
-          )
-          .timeout(const Duration(seconds: 20));
+          );
 
       if (response.statusCode == 200) {
         buttonState = ButtonState.success;
         notifyListeners();
-        Navigator.pushReplacementNamed(
-            context, RouteGenerator.loginSuccessScreen);
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_)=>const LoginSuccessScreen()));
         toastMessage(text: "Sign in successful", isError: true);
       } else {
         buttonState = ButtonState.idle;

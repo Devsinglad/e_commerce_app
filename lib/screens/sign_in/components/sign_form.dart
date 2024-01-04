@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../../../components/c_text_form_field.dart';
 import '../../../components/custom_surfix_icon.dart';
+import '../../../config/routes.dart';
 import '../../../provider/controller.dart';
 
 class SignForm extends StatefulWidget {
@@ -55,7 +56,9 @@ class _SignFormState extends State<SignForm> {
                 if (_formKey.currentState!.validate()) {
                   snapshot.signIn(controllers.userNameController.text,
                       controllers.passwordController.text, context);
-                  print(controllers.userNameController.text);
+                  print(snapshot.buttonState);
+
+
                 }
               },
               child: snapshot.buttonState == ButtonState.loading

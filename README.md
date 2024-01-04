@@ -2,7 +2,6 @@
 
 A new Flutter project.
 
-Certainly! Below is a basic example of a README file for a Flutter shop app that uses the Provider package for state management. Please customize it based on your specific app details, features, and structure.
 
 ---
 
