@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/product_category.dart';
 
 class AppControllers extends ChangeNotifier {
-  bool isFavourite = false;
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
