@@ -21,7 +21,6 @@ class _SpecialOffersState extends State<SpecialOffers> {
       var category = Provider.of<ProductApi>(context, listen: false);
       category.getCategories();
     });
-    // TODO: implement initState
     super.initState();
   }
 
@@ -100,7 +99,7 @@ class SpecialOfferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 20, top: 10),
+      padding: const EdgeInsets.only(left: 20, top: 20,right: 20),
       child: GestureDetector(
         onTap: press,
         child: SizedBox(
@@ -142,6 +141,7 @@ class SpecialOfferCard extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+
                           ),
                         ),
                       ],

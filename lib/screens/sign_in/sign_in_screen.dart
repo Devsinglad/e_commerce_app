@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
 import '../../components/no_account_text.dart';
-import '../../provider/controller.dart';
 import 'components/sign_form.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -14,14 +11,6 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    var provider = Provider.of<AppControllers>(context,listen: false);
-    provider.userNameController.text = 'johnd';
-    provider.passwordController.text = r'm38rmF$';
-  }
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
@@ -50,6 +39,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   SignForm(),
                   SizedBox(height: 16),
                   NoAccountText(),
+
                 ],
               ),
             ),

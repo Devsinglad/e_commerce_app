@@ -1,5 +1,6 @@
 import 'package:e_commerce_app/components/c_text_form_field.dart';
 import 'package:e_commerce_app/config/routes.dart';
+import 'package:e_commerce_app/utils/constants.dart';
 import 'package:e_commerce_app/utils/enum.dart';
 import 'package:e_commerce_app/utils/validator.dart';
 import 'package:flutter/material.dart';
@@ -30,52 +31,12 @@ class _SignUpFormState extends State<SignUpForm> {
       child: Column(
         children: [
           CTextFormField(
-            textControllor: controllers.emailController,
-            keyboardType: TextInputType.emailAddress,
-            validator: (str) => _validators.validateEmail(
-              controllers.emailController.text,
-            ),
-            hintText: "Enter your email",
-            suffixIcon:
-                const CustomSurffixIcon(svgIcon: "assets/icons/Mail.svg"),
-          ),
-          const SizedBox(height: 20),
-          CTextFormField(
-            textControllor: controllers.firstNameController,
-            validator: (str) => _validators.validateEmptyTextField(
-              controllers.firstNameController.text,
-            ),
-            hintText: "Enter your first name",
-            suffixIcon:
-                const CustomSurffixIcon(svgIcon: "assets/icons/User.svg"),
-          ),
-          const SizedBox(height: 20),
-          CTextFormField(
-            hintText: "Enter your last name",
-            suffixIcon:
-                const CustomSurffixIcon(svgIcon: "assets/icons/User.svg"),
-            textControllor: controllers.lastNameController,
-            validator: (str) => _validators
-                .validateEmptyTextField(controllers.lastNameController.text),
-          ),
-          const SizedBox(height: 20),
-          CTextFormField(
             hintText: "Enter your username",
             suffixIcon:
                 const CustomSurffixIcon(svgIcon: "assets/icons/User.svg"),
             textControllor: controllers.userNameController,
             validator: (str) => _validators
                 .validateEmptyTextField(controllers.userNameController.text),
-          ),
-          const SizedBox(height: 20),
-          CTextFormField(
-            keyboardType: TextInputType.phone,
-            hintText: "Enter your phone number",
-            suffixIcon:
-                const CustomSurffixIcon(svgIcon: "assets/icons/Phone.svg"),
-            textControllor: controllers.phoneNumberController,
-            validator: (str) => _validators
-                .validatesPhoneNumber(controllers.phoneNumberController.text),
           ),
           const SizedBox(height: 20),
           CTextFormField(
@@ -113,45 +74,40 @@ class _SignUpFormState extends State<SignUpForm> {
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   snapshot.signUp(
-                    controllers.phoneNumberController.text,
-                    controllers.passwordController.text,
-                    controllers.userNameController.text,
-                    controllers.emailController.text,
-                    controllers.firstNameController.text,
-                    controllers.lastNameController.text,
-                    controllers.cityController.text,
-                    context,
+                    password: controllers.passwordController.text,
+                    username: controllers.userNameController.text,
+                    city: controllers.cityController.text,
+                    context: context,
                   );
-
-
                 }
-
               },
               child: snapshot.buttonState == ButtonState.loading
                   ? customLoader()
                   : const Text("Create Account"),
             );
           }),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Already Have an account?   "),
+              InkWell(
+                onTap: () {
+                  Navigator.pushReplacementNamed(
+                      context, RouteGenerator.loginPage);
+                },
+                child: const Text(
+                  "Sign In",
+                  style: TextStyle(color: kPrimaryColor),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  @override
-  void dispose() {
-    clear();
-    super.dispose();
-  }
-  void clear(){
-    var controllers = Provider.of<AppControllers>(context, listen: false);
-    controllers.phoneNumberController.dispose();
-    controllers.passwordController.dispose();
-    controllers.confirmPasswordController.dispose();
-    controllers.firstNameController.dispose();
-    controllers.userNameController.dispose();
-    controllers.emailController.dispose();
-    controllers.firstNameController.dispose();
-    controllers.lastNameController.dispose();
-    controllers.cityController.dispose();
-  }
+
+
 }

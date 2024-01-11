@@ -1,7 +1,8 @@
-import 'package:e_commerce_app/config/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../components/product_card.dart';
-import '../../models/Product.dart';
+import '../../data/products/products_api.dart';
+import '../../provider/controller.dart';
 import '../details/details_screen.dart';
 
 class FavoriteScreen extends StatelessWidget {
@@ -10,37 +11,45 @@ class FavoriteScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Column(
-        children: [
-          Text(
-            "Favorites",
-            style: Theme.of(context).textTheme.titleLarge,
+      child: Consumer<ProductApi>(builder: (context, snapshot, _) {
+        final favoriteProducts = snapshot.products
+            .where((product) => context.read<AppControllers>().isFavorite(product.id))
+            .toList();
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              Text(
+                "Favorites",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: GridView.builder(
+                    itemCount: favoriteProducts.length,
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 200,
+                      childAspectRatio: 0.7,
+                      mainAxisSpacing: 20,
+                      crossAxisSpacing: 16,
+                    ),
+                    itemBuilder: (context, index) => ProductCard(
+                        product: favoriteProducts[index],
+                        onPress: () => Navigator.push(context,
+                            MaterialPageRoute(builder: (_) =>  DetailsScreen(
+                              id: favoriteProducts[index].id.toString(),
+                              productsInEachCat:favoriteProducts[index] ,
+                              rating:favoriteProducts[index].rating.toString(),
+
+                            )))),
+                  ),
+                ),
+              )
+            ],
           ),
-          // Expanded(
-          //   child: Padding(
-          //     padding: const EdgeInsets.all(16),
-          //     child: GridView.builder(
-          //       itemCount: demoProducts.length,
-          //       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          //         maxCrossAxisExtent: 200,
-          //         childAspectRatio: 0.7,
-          //         mainAxisSpacing: 20,
-          //         crossAxisSpacing: 16,
-          //       ),
-          //       itemBuilder: (context, index) => ProductCard(
-          //         product: demoProducts[index],
-          //         onPress: () => Navigator.pushNamed(
-          //           context,
-          //           RouteGenerator.detailsScreen,
-          //           arguments:
-          //               ProductDetailsArguments(product: demoProducts[index]),
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // )
-        ],
-      ),
+        );
+      }),
     );
   }
 }

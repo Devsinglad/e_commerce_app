@@ -22,6 +22,7 @@ class ProductApi extends ChangeNotifier {
   List<Products> userCartItems = [];
   bool initCatPage = false;
   bool initCartPage = false;
+  bool initProductPage = false;
 
   Future<void> getCategories() async {
     initCatPage = true;
@@ -43,12 +44,18 @@ class ProductApi extends ChangeNotifier {
   }
 
   Future<List<ProductsInEachCat>> getCategoriesProducts(categories) async {
+    initProductPage = true;
+    print('<<<<$initProductPage>>>>');
+    notifyListeners();
+    await Future.delayed(const Duration(milliseconds: 300));
     ResponseModel responseModel = await _apiService.call(
       method: HttpMethod.get,
       endpoint: 'https://fakestoreapi.com/products/category/$categories',
     );
     print(responseModel.statusCode);
     if (responseModel.isSuccess) {
+      initProductPage = false;
+      notifyListeners();
       var decodedData = jsonDecode(responseModel.response.body);
       products = (decodedData as List<dynamic>)
           .map((item) => ProductsInEachCat.fromJson(item))
@@ -58,6 +65,9 @@ class ProductApi extends ChangeNotifier {
       print('>>>>>>${products.first.rating}');
       return products;
     } else {
+      initProductPage = false;
+      notifyListeners();
+
       throw Exception('Failed to load products');
     }
   }
@@ -82,7 +92,7 @@ class ProductApi extends ChangeNotifier {
       if (responseModel.isSuccess) {
         toastMessage(text: 'Added to cart');
       }
-    } catch (e, s) {
+    } catch (e) {
       print(e);
     }
   }
@@ -108,7 +118,7 @@ class ProductApi extends ChangeNotifier {
             }
           }
         }
-         //fetchProductDetailsForCart();
+        //fetchProductDetailsForCart();
         initCartPage = false;
         notifyListeners();
       } else {
@@ -144,7 +154,7 @@ class ProductApi extends ChangeNotifier {
         var responseData = SingleProductDetail.fromJson(decodedData);
         price = responseData.price;
         image = responseData.image;
-        title= responseData.title;
+        title = responseData.title;
 
         print('<<<<<${responseData.image}');
         notifyListeners();
@@ -156,5 +166,4 @@ class ProductApi extends ChangeNotifier {
       throw Exception('Bad Request: $e, $s');
     }
   }
-
 }

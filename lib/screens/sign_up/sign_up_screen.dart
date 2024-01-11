@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import '../../components/socal_card.dart';
 import '../../utils/constants.dart';
 import 'components/sign_up_form.dart';
 

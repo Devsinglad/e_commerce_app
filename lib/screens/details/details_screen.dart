@@ -3,8 +3,6 @@ import 'package:e_commerce_app/models/product_category.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-
-import '../../models/Product.dart';
 import 'components/product_description.dart';
 import 'components/product_images.dart';
 import 'components/top_rounded_container.dart';
@@ -98,8 +96,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
           QuantityWidget(
             initialQuantity: 1,
             onQuantityChanged: (newQuantity) {
-
-              print('New Quantity: $newQuantity');
               quantity=newQuantity;
               setState(() {
 

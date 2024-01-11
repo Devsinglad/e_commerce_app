@@ -3,7 +3,7 @@ import 'package:hive_flutter/adapters.dart';
 class HiveKeys {
   static const String appBox = "appBox";
   static const String token = 'token';
-  static const String user = "userNumber";
+  static const String user = "user";
 }
 
 abstract class AbstractHive {

@@ -1,116 +1,91 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:e_commerce_app/screens/login_success/login_success_screen.dart';
 import 'package:e_commerce_app/utils/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
-import '../../config/routes.dart';
-import '../../core/api_const.dart';
-import '../../core/base_api.dart';
-import '../../core/base_response.dart';
+import '../../models/user_model.dart';
 import '../../provider/controller.dart';
 import '../../utils/enum.dart';
-import '../database.dart';
-import 'package:http/http.dart' as http;
+import '../localDB/database.dart';
 
 class AuthApi extends ChangeNotifier {
-  final ApiService _apiService = ApiService();
-  final ApiRoutes _apiRoutes = ApiRoutes();
   ButtonState buttonState = ButtonState.idle;
-  HiveStorage hiveStorage = HiveStorage(Hive.box(HiveKeys.appBox));
-  String userNumber = '';
-
-  Future<void> signUp(phoneNumber, password, username, email, firstName,
-      lastName, city, context) async {
+  Future<void> signUp({
+    required String password,
+    required String username,
+    required String city,
+    required context,
+  }) async {
     buttonState = ButtonState.loading;
     notifyListeners();
-    ResponseModel responseModel = await _apiService.call(
-      method: HttpMethod.post,
-      endpoint: '${_apiRoutes.baseUrl}${_apiRoutes.signUpAuth}',
-      reqBody: {
-        'email': email,
-        'username': username,
-        'password': password,
-        'name': {
-          'firstname': firstName,
-          'lastname': lastName,
-        },
-        'address': {
-          'city': city,
-          'street': '7835 new road',
-          'number': '3',
-          'zipcode': '12926-3874',
-          'geolocation': {
-            'lat': '-37.3159',
-            'long': '81.1496',
-          },
-        },
-        'phone': phoneNumber,
-      },
-    );
-    if (responseModel.isSuccess) {
-      var controllers = Provider.of<AppControllers>(context, listen: false);
-      buttonState = ButtonState.success;
-      notifyListeners();
-      toastMessage(text: 'Account Created');
-      controllers.phoneNumberController.clear();
-      controllers.passwordController.clear();
-      controllers.confirmPasswordController.clear();
-      controllers.firstNameController.clear();
-      controllers.emailController.clear();
-      controllers.userNameController.clear();
-      controllers.firstNameController.clear();
-      controllers.lastNameController.clear();
-      controllers.cityController.clear();
+    await Future.delayed(const Duration(milliseconds: 300));
+    await Hive.openBox<User>(HiveKeys.user);
+    final userBox = Hive.box<User>(HiveKeys.user);
 
-      Navigator.pushNamed(context, RouteGenerator.loginPage);
-    } else {
+    if (userBox.values.any((element) => element.username == username)) {
       buttonState = ButtonState.idle;
-      toastMessage(text: responseModel.response.body, isError: true);
+      toastMessage(text: 'Username already exists', isError: true);
       notifyListeners();
+      return;
     }
+
+    final newUser = User(
+      username: username,
+      city: city,
+      password: password,
+    );
+
+    userBox.add(newUser);
+
+    var controllers = Provider.of<AppControllers>(context, listen: false);
+    buttonState = ButtonState.success;
+    notifyListeners();
+
+    toastMessage(text: 'Account Created');
+    controllers.passwordController.clear();
+    controllers.confirmPasswordController.clear();
+    controllers.userNameController.clear();
+    controllers.cityController.clear();
+    Navigator.pop(context);
   }
 
-  void signIn(username, password, context) async {
+  void signIn(String username, String password, context) async {
+    var controllers = Provider.of<AppControllers>(context, listen: false);
+
     try {
       buttonState = ButtonState.loading;
       notifyListeners();
-      final url = Uri.parse('https://fakestoreapi.com/auth/login');
-      final response = await http
-          .post(
-            url,
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode(
-              {'username': username, 'password': password},
-            ),
-          );
+      await Future.delayed(const Duration(milliseconds: 300));
+      final userBox = Hive.box<User>(HiveKeys.user);
 
-      if (response.statusCode == 200) {
-        buttonState = ButtonState.success;
-        notifyListeners();
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_)=>const LoginSuccessScreen()));
-        toastMessage(text: "Sign in successful", isError: true);
-      } else {
-        buttonState = ButtonState.idle;
-        toastMessage(text: response.body, isError: true);
-        notifyListeners();
-        print('Request failed with status: ${response.statusCode}');
+      for (var i = 0; i < userBox.length; i++) {
+        final user = userBox.getAt(i);
+        print("Username: ${user?.username}, Password: ${user?.password}");
+
+        if (user != null &&
+            user.username == username &&
+            user.password == password) {
+          buttonState = ButtonState.success;
+          notifyListeners();
+          toastMessage(text: "Sign in successful", isError: false);
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (_) => const LoginSuccessScreen()));
+          controllers.passwordController.clear();
+          controllers.userNameController.clear();
+          return;
+        }
       }
-    } on TimeoutException catch (e) {
-      toastMessage(text: 'Network Error');
+
       buttonState = ButtonState.idle;
+      toastMessage(text: 'Invalid Details', isError: true);
+      controllers.passwordController.clear();
+      controllers.userNameController.clear();
       notifyListeners();
     } catch (e) {
-      print(e);
+      toastMessage(text: 'Sign in Error');
+      buttonState = ButtonState.idle;
+      notifyListeners();
     }
-  }
-
-  String? getStoredToken() {
-    var token = hiveStorage.get<String?>(HiveKeys.token);
-    print('save_token: $token');
-    notifyListeners();
-    return token;
   }
 }
